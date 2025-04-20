@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Word Prediction - Friends Script</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: rgba(108, 92, 231, 0.8);
+            --secondary: #00cec9;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --glass: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: var(--glass);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+            opacity: 0.2;
+            z-index: -1;
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: rgba(45, 52, 54, 0.8);
+            font-weight: 400;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(45, 52, 54, 0.9);
+        }
+        
+        input[type="text"], 
+        input[type="number"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        input[type="text"]:focus, 
+        input[type="number"]:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.5s ease;
+        }
+        
+        .result h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .result h3::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            margin-right: 10px;
+        }
+        
+        .result p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .result strong {
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Next Word Prediction</h1>
+        <p class="subtitle">Enter a phrase from Friends script to predict the next words</p>
+        
+        <form method="POST" action="/">
+            <div class="form-group">
+                <label for="seed_text">Your phrase:</label>
+                <input type="text" id="seed_text" name="seed_text" 
+                       value="{{ seed_text if seed_text else '' }}" 
+                       placeholder="E.g. 'How you doin'?" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="num_words">Words to predict:</label>
+                <input type="number" id="num_words" name="num_words" 
+                       min="1" max="10" value="{{ num_words if num_words else '3' }}" required>
+            </div>
+            
+            <button type="submit">Generate Prediction</button>
+        </form>
+        
+        {% if predicted_text %}
+        <div class="result">
+            <h3>Prediction Result</h3>
+            <p><strong>Original:</strong> {{ seed_text }}</p>
+            <p><strong>Predicted:</strong> {{ predicted_text }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
